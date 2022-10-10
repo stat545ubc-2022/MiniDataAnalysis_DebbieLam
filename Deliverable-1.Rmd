@@ -80,10 +80,10 @@ And that is exactly the first thing that you will do!
 
 <!-------------------------- Start your work below ---------------------------->
 
-1: CHOICE_1\_HERE\
-2: CHOICE_2\_HERE\
-3: CHOICE_3\_HERE\
-4: CHOICE_4\_HERE
+1: building_permits
+2: steam_games
+3: vancouver_trees
+4: flow_sample
 
 <!----------------------------------------------------------------------------->
 
@@ -95,7 +95,13 @@ And that is exactly the first thing that you will do!
 
 ```{r}
 ### EXPLORE HERE ###
-steam_games
+glimpse(apt_buildings) #too many columns
+glimpse(building_permits) #looks good
+glimpse(cancer_sample) #too many columns
+glimpse(flow_sample) #columns have easy names
+glimpse(parking_meters) #confusing column names
+glimpse(steam_games) #straightforward data
+glimpse(vancouver_trees) #straightforward data as well
 ```
 
 <!----------------------------------------------------------------------------->
@@ -103,13 +109,17 @@ steam_games
 1.3 Now that you've explored the 4 datasets that you were initially most interested in, let's narrow it down to 2. What lead you to choose these 2? Briefly explain your choices below, and feel free to include any code in your explanation.
 
 <!-------------------------- Start your work below ---------------------------->
-
+#2 datasets I am cosidering now is steam_games and vancouver_trees because the data is straightforward and I am able to think of relationships between the different variables. Additionally, these two datasets have fewer variables to work with so it will be easy to work with.
 <!----------------------------------------------------------------------------->
 
 1.4 Time for the final decision! Going back to the beginning, it's important to have an *end goal* in mind. For example, if I had chosen the `titanic` dataset for my project, I might've wanted to explore the relationship between survival and other variables. Try to think of 1 research question that you would want to answer with each dataset. Note them down below, and make your final choice based on what seems more interesting to you!
 
 <!-------------------------- Start your work below ---------------------------->
+#For steam_games, I would be interested to see the relationship between release_date and genre to see if there was a specific time period where certain genres were more popular. I could plot the relationship by bar graph.
 
+#For vancouver_trees, I would be interested manipulating diameter to find the average diameter and neighbourhood_name to see which neighbourhoods have on average wider diameter trees. 
+
+#My final choice is vancouver_trees because I'm interested to know more about the landscape in Vancouver which is the city that I was born and raised in.
 <!----------------------------------------------------------------------------->
 
 # Important note
