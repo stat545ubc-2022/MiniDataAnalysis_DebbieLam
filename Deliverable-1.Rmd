@@ -196,10 +196,10 @@ ggplot(vancouver_trees, aes(root_barrier, diameter)) + geom_boxplot()
 ```
 
 **Task 3: Write your research questions**
-1. 
-2.
-3.
-4.
+1. What are the average diameter of trees in each neighbourhood in Vancouver?
+2. Does having a root barrier result in a smaller tree diameter? 
+3. Does having a root barrier result in a smaller height range tree?
+4. Is the height range of trees getting smaller as the years go on?
 
 
 # Task 4: Process and summarize your data (13 points)
@@ -229,7 +229,98 @@ Ensure that the output of each operation is printed!
 Make sure it's clear what research question you are doing each operation for!
 
 <!------------------------- Start your work below ----------------------------->
+**Research Question 1: What are the average diameter of trees in each neighbourhood in Vancouver?**
 
+*Summarize 1*
+```{r}
+#To find the average mean of trees in each neighbourhood
+neighbourhood_meandiameter <- vancouver_trees %>%
+  group_by(neighbourhood_name) %>%
+  summarise(diameter_mean = mean(diameter, na.rm = TRUE)) 
+
+#Now I want to know the summary statistics of the average diameter between the different neighbourhoods.
+#Making sure I have the dataset I want
+glimpse(neighbourhood_meandiameter)
+#Finding range
+range(neighbourhood_meandiameter$diameter_mean)
+#Can determine min and max for range aas well as mean, median, 1st and 3rd quartile
+summary(neighbourhood_meandiameter) 
+#Finding standard deviation
+sd(neighbourhood_meandiameter$diameter_mean)
+```
+From the summary or range function, the range of average diameters grouped by different neighbourhoods is 7.446 - 14.240. From the summary function, the mean is 11.435 and the median is 11.435. The standard deviation is 1.684479.
+
+*Graphing 8*
+```{r}
+ggplot(neighbourhood_meandiameter, aes(diameter_mean)) + geom_histogram(bins = 10)
+ggplot(neighbourhood_meandiameter, aes(diameter_mean)) + geom_histogram(bins = 20)
+ggplot(neighbourhood_meandiameter, aes(diameter_mean)) + geom_histogram(bins = 40)
+```
+From the different histograms, I plotted where bins = 10, 20, and 40 and I think the bins = 10 looks the best because you can see the distribution better and there are no big gaps between the different bins.
+
+**Research question 2: Does having a root barrier result in a smaller tree diameter?**
+
+*Summarize 1*
+```{r}
+#First I want to compare statistics between trees that having a root barrier and trees that do not
+rootbarrier_y <- filter(vancouver_trees, root_barrier == "Y")
+glimpse(rootbarrier_y)
+
+rootbarrier_n <- filter(vancouver_trees, root_barrier =="N")
+glimpse(rootbarrier_n)
+
+#Now I will look at range, mean, standard deviation, and median of diameter for both datasubsets. 
+summary(rootbarrier_y$diameter)
+sd(rootbarrier_y$diameter)
+#Min = 0.5, Max = 86, Median = 3.0, Mean = 4.4, SD = 2.998134
+
+summary(rootbarrier_n$diameter)
+sd(rootbarrier_n$diameter)
+#Min = 0, Max = 435, Median = 10.0, Mean = 11.96, SD = 9.290934
+```
+Comparing the statistics between the diameter of trees that do or do not have a root barrier shows that trees with a root barrier on average is smaller than trees that do not have a root barrier.
+
+*Graphing 6*
+```{r}
+ggplot(vancouver_trees, aes(root_barrier, diameter)) + geom_jitter(alpha = 0.5) + xlab("Root Barrier") 
+```
+This jitterplot visualizes that trees trees with a root barrier have a smaller diameter compared to trees without a root barrier. This is a good time to make the transparency lower so that the dots on the jitterplot are not too crowded.
+
+**Research Question 3: Does having a root barrier result in a shorter height tree?**
+
+*Summarize 2*
+```{r}
+#To count the number of observations, I will be grouping the height ranges into levels and counting how many trees are in each level.
+rootbarrier_y$height_range_id <- as.factor(rootbarrier_y$height_range_id)
+summary(rootbarrier_y$height_range_id)
+#Level 0 = 43,    1 = 6998,   2 = 1633,    3 = 314,    4 = 142,    5 = 13    6 = 8,    7 = 2,    8 = 2,    9 = 1
+
+rootbarrier_n$height_range_id <-as.factor(rootbarrier_n$height_range_id)
+summary(rootbarrier_n$height_range_id)
+#Level 0 = 171, 1 = 32961, 2 = 40573, 3 = 25993, 4 = 20388, 5 = 9001, 6 = 5187, 7 = 2223, 8 = 744, 9 = 202, 10 = 12
+```
+Comparing the number of observations in higher level height ranges between trees that do and do not have root barriers, you can see that trees that do not have root barriers have more observations seen in the heigher level of height ranges.
+
+*Graphing 
+```{r}
+ggplot(vancouver_trees, aes(root_barrier, height_range_id)) + geom_jitter(colour = "dark green", alpha = 0.5) + xlab("Root Barrier") + ylab("Height Range")
+```
+This jitterplot shows that there are more trees in different height ranges if they do not have a root barrier.
+
+**Research Question 4: Is the height ranges of trees getting smaller as the years go on?**
+
+*Summarize 1*
+```{r}
+summary(vancouver_trees$height_range_id)
+sd(vancouver_trees$height_range_id)
+```
+From these two functions, I can see the range of height-ranges are from 0 - 10. The mean is 2.627, the median is 2 and the standard deviation is 1.542994.
+
+*Graphing 5*
+```{r}
+ggplot(vancouver_trees, aes(date_planted, height_range_id)) + geom_line(colour = "Blue") + geom_point(colour = "blue", size = 0.5)
+```
+From this graph, you can see that there were trees with higher height range before 2000 and the height range slowly declines from 2000 to 2020. This graph has geom_point added onto geom_line (2 layers) so that you can still the full range of heights. 
 <!----------------------------------------------------------------------------->
 
 ### 1.2 (3 points)
@@ -237,6 +328,7 @@ Make sure it's clear what research question you are doing each operation for!
 Based on the operations that you've completed, how much closer are you to answering your research questions? Think about what aspects of your research questions remain unclear. Can your research questions be refined, now that you've investigated your data a bit more? Which research questions are yielding interesting results?
 
 <!-------------------------- Start your work below ---------------------------->
+Based on these exercises, I think I can close to answering question 2-4. Questions 2 and 2 where I look at the impact of root barrier on height and diameter shows that having a root barrier negatively impacts these two qualities of a tree. In question 4, the graph visualizes very well that the height of trees after 2000 have a negative trend. For question 1, the summarize exercise is able to tell me the average diameter of trees in each neighbourhood but the plot exercise does not contribute much to answering the research question.
 
 <!----------------------------------------------------------------------------->
 
