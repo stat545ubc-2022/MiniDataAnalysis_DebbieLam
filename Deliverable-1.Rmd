@@ -239,8 +239,6 @@ neighbourhood_meandiameter <- vancouver_trees %>%
   summarise(diameter_mean = mean(diameter, na.rm = TRUE)) 
 
 #Now I want to know the summary statistics of the average diameter between the different neighbourhoods.
-#Making sure I have the dataset I want
-glimpse(neighbourhood_meandiameter)
 #Finding range
 range(neighbourhood_meandiameter$diameter_mean)
 #Can determine min and max for range aas well as mean, median, 1st and 3rd quartile
@@ -264,10 +262,7 @@ From the different histograms, I plotted where bins = 10, 20, and 40 and I think
 ```{r}
 #First I want to compare statistics between trees that having a root barrier and trees that do not
 rootbarrier_y <- filter(vancouver_trees, root_barrier == "Y")
-glimpse(rootbarrier_y)
-
 rootbarrier_n <- filter(vancouver_trees, root_barrier =="N")
-glimpse(rootbarrier_n)
 
 #Now I will look at range, mean, standard deviation, and median of diameter for both datasubsets. 
 summary(rootbarrier_y$diameter)
