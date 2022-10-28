@@ -67,9 +67,8 @@ glimpse(vancouver_trees) %>%
 ```
 I think the data is not tidy. 'std_street' and 'on_street' is the same value and can be collapsed into one variable or column.
 
-Alternatively, we can combine 'civic_number' and 'std_street' to retrieve the full address and form a new variable. In that case, it would be good to also combine 'on_street_block' and 'on_street' to form another new variable to capture the full information.  
+Now that I notice the repetition in 'std_street' and 'on_street', we can actually combine 'civic_number' and 'std_street' to retrieve the full address and form a new variable. In that case, it would be good to also combine 'on_street_block' and 'on_street' to form another new variable to capture the full information.  
 
-It wonder if it would be worthwhile to combine 'latitude' and 'longitude' and call this variable 'coordinates' with latitude as the first number.
 <!----------------------------------------------------------------------------->
 
 ### 2.2 (5 points)
@@ -88,20 +87,22 @@ glimpse(vancouver_trees) %>%
 ```
 
 **Tidying the data**
+At first I was confused why 'std_street' and 'on_street' were variables in the original data but rather than simplifying these two variables together, I will combine these variables with 'civic_number' and 'on_street_block' respectively to produce the full house address and full block address of each tree.
 ```{r} 
-#At first I was confused why 'std_street' and 'on_street' were variables in the original data but rather than simplifying these two variables together, I will combine these variables with 'civic_number' and 'on_street_block' respectively.
 vancouver_trees_tidy <- vancouver_trees %>%
   unite(col = house_address, c(civic_number, std_street), sep = "-") %>%
   unite(col = block_address, c(on_street_block, on_street), sep = "-") %>%
-  unite(col = coordinates, c(latitude, longitude), sep = ",") %>%
-  print(n=5)
-
-glimpse(vancouver_trees_tidy)
-
+  print(n=10)
 ```
 
-
-
+**Untidying to the original state**
+To untidy the data to the original state, I will separate the columns that I have united together.
+```{r}
+vancouver_trees_untidy <- vancouver_trees_tidy %>%
+  separate(col = house_address, c("civic_number", "std_street"), sep = '-') %>%
+  separate(col = block_address, c("on_street_block", "on_street"), sep = '-') %>%
+  print(n=10)
+```
 <!----------------------------------------------------------------------------->
 
 ### 2.3 (7.5 points)
@@ -110,21 +111,46 @@ Now, you should be more familiar with your data, and also have made progress in 
 
 <!-------------------------- Start your work below ---------------------------->
 
-1.  *FILL_THIS_IN*
-2.  *FILL_THIS_IN*
+1.  Does having a root barrier result in a smaller diameter in the 4 most common species in the Acer genus?
+2.  Is the height range of the 4 most common species in the Acer genus getting smaller from 2000 until now?
 
 <!----------------------------------------------------------------------------->
 
 Explain your decision for choosing the above two research questions.
-
 <!--------------------------- Start your work below --------------------------->
+1. I was originally going to use this question from Milestone 1, "Does having a root barrier result in smaller tree diameter?" but I think I was too broad. I am narrowing it down to look at the most common genus which I have identified as Acer. Since there are many species in the Acer genus, I will be looking at the 4 most common species in this genus.
+```{r}
+vancouver_trees %>%
+group_by(genus_name) %>%
+summarize(count = n()) %>%
+arrange(desc(count))
+```
+
+2. For question 2, my original question from Milestone 1 was, "Is the height range of trees getting smaller as the years go on?" but I realize that is not specific enough. From my previous milestone assignment, I noticed that the height range started to decline after 2000 so I want to see if this is true for the 4 most common species in the Acer genus.
 
 <!----------------------------------------------------------------------------->
 
 Now, try to choose a version of your data that you think will be appropriate to answer these 2 questions. Use between 4 and 8 functions that we've covered so far (i.e. by filtering, cleaning, tidy'ing, dropping irrelevant columns, etc.).
 
 <!--------------------------- Start your work below --------------------------->
+```{r}
+#Choosing trees in the Acer genus
+vancouver_trees_acer <- vancouver_trees %>%
+  filter(genus_name == "ACER")
 
+#Finding the 4 most common species under the Acer genus
+vancouver_trees_acer %>%
+  group_by(species_name) %>%
+  summarize(count = n()) %>%
+  arrange(desc(count))
+
+#Filtering the dataset to have only the 4 most common species and selecting variables that I will be looking at
+vancouver_trees_4subset <- vancouver_trees_acer %>%
+  filter(species_name %in% c("PLATANOIDES", "RUBRUM", "FREEMANI X", "CAMPESTRE")) %>%
+  select(c("tree_id", "species_name", "root_barrier", "height_range_id", "diameter", "date_planted")) %>%
+  print(n=5)
+```
+I will be working with vancouver_trees_4subset as my dataset going forward.
 <!----------------------------------------------------------------------------->
 
 # Task 2: Special Data Types (10)
@@ -134,6 +160,10 @@ For this exercise, you'll be choosing two of the three tasks below -- both tasks
 But first, tasks 1 and 2 below ask you to modify a plot you made in a previous milestone. The plot you choose should involve plotting across at least three groups (whether by facetting, or using an aesthetic like colour). Place this plot below (you're allowed to modify the plot if you'd like). If you don't have such a plot, you'll need to make one. Place the code for your plot below.
 
 <!-------------------------- Start your work below ---------------------------->
+This plot is taken from Milestone 1
+```{r}
+ggplot(vancouver_trees, aes(root_barrier, diameter)) + geom_jitter(alpha = 0.5) + xlab("Root Barrier") 
+```
 
 <!----------------------------------------------------------------------------->
 
@@ -156,14 +186,42 @@ Now, choose two of the following tasks.
 
 <!-------------------------- Start your work below ---------------------------->
 
-**Task Number**: FILL_THIS_IN
+**Task Number**: 2 
+I will be using research question 1.
+```{r}
+vancouver_trees_dfct <- vancouver_trees_4subset %>%
+  mutate(diameter_level = factor(case_when(diameter < 10 ~ "very small",
+                                    diameter < 20 ~ "small",
+                                    diameter < 30 ~ "moderate",
+                                    diameter < 40 ~ "large",
+                                    TRUE ~ "very large"),
+                               levels = c("very small", "small", "moderate", "large", "very large")))
+levels(vancouver_trees_dfct$diameter_level)
+vancouver_trees_dfct
 
+ggplot(vancouver_trees_dfct, aes(root_barrier, diameter_level)) + geom_jitter(alpha = 0.5) + xlab("Root Barrier") + ylab("Diameter Level")
+```
+I chose to group diameter as a variable to level because previously it was a numeric variable but now, I have categorized it by "very small", "small", "moderate", "large" and "very large". In the graph from Milestone 1, you would see that there is a larger band of points in trees without a root barrier than trees that do. In this graph that looks at diameter levels, it gives additional detail that trees that do not have root barriers are generally at least moderate height whereas trees with root barriers are generally in the very small range.
 <!----------------------------------------------------------------------------->
 
 <!-------------------------- Start your work below ---------------------------->
 
-**Task Number**: FILL_THIS_IN
+**Task Number**: 3
+I will be using research question 2.
+```{r}
+library(lubridate)
 
+#Filtering the dataset to only have trees planted starting from 2000 until now
+vancouver_trees_2000 <- vancouver_trees_4subset %>%
+  filter(date_planted >= "2000-01-01") %>%
+  arrange(date_planted) %>%
+  print(n=5)
+
+vancouver_trees_date <- vancouver_trees_2000 %>%
+  mutate(quarter_planted = quarter(date_planted)) %>%
+  print(n=5)
+```
+I chose to create a new column that shows that quarter of the year the tree is planted in. Quarter 1 = Jan - March, Quarter 2: April - June, Quarter 3: July - September, Quarter 4: October - December. This information may be useful if we are looking to compare trees planted in the dry months (quarter 2 & 3) versus wet months (quarter 1 & 2). 
 <!----------------------------------------------------------------------------->
 
 # Task 3: Modelling
@@ -174,9 +232,11 @@ Pick a research question, and pick a variable of interest (we'll call it "Y") th
 
 <!-------------------------- Start your work below ---------------------------->
 
-**Research Question**: FILL_THIS_IN
+**Research Question**: Is there association between diameter and presence of a root barrier?
+Null Hypothesis: The diameter of trees is not associated with the presence of a root barrier.
+Alternative Hypothesis: The diameter of trees is associated with the presence of a root barrier.
 
-**Variable of interest**: FILL_THIS_IN
+**Variable of interest**: Diameter
 
 <!----------------------------------------------------------------------------->
 
@@ -191,7 +251,10 @@ Fit a model or run a hypothesis test that provides insight on this variable with
     -   You could use `lm()` to test for significance of regression.
 
 <!-------------------------- Start your work below ---------------------------->
-
+```{r}
+vancouver_trees_lm <- lm(diameter ~ root_barrier, vancouver_trees_4subset)
+summary(vancouver_trees_lm)
+```
 <!----------------------------------------------------------------------------->
 
 ## 2.2 (5 points)
@@ -203,7 +266,17 @@ Produce something relevant from your fitted model: either predictions on Y, or a
 -   Obtain your results using the `broom` package if possible. If your model is not compatible with the broom function you're needing, then you can obtain your results by some other means, but first indicate which broom function is not compatible.
 
 <!-------------------------- Start your work below ---------------------------->
+```{r}
+#Finding p-value from broom package
+library(broom)
+tidy(vancouver_trees_lm)
+```
+The p-value less than 0.05 which suggests that the null hypothesis is false and that there is association between diameter and presence of a root barrier.
 
+```{r}
+aug_lm <- augment(vancouver_trees_lm)
+head(aug_lm)
+```
 <!----------------------------------------------------------------------------->
 
 # Task 4: Reading and writing data
@@ -218,7 +291,21 @@ Take a summary table that you made from Milestone 1 (Task 4.2), and write it as 
 -   **Reproducibility criteria**: You should be able to delete the csv file, and remake it simply by knitting this Rmd file.
 
 <!-------------------------- Start your work below ---------------------------->
+I will create a summary table based on Milestone 1 and adapt it to my new dataset from this milestone.
+```{r}
+diameter_summary <- vancouver_trees_4subset %>%
+  select(species_name, diameter) %>%
+  group_by(species_name) %>%
+  summarize(mean_diameter = mean(diameter),
+            median_diameter = median(diameter),
+            sd_diameter = sd(diameter),
+            range_diameter = range(diameter))
+diameter_table <- data.frame(diameter_summary)
+print(diameter_table)
 
+dir.create(here::here("output"))
+write_csv(diameter_table, here::here("output", "exported_diametertable.csv"))
+```
 <!----------------------------------------------------------------------------->
 
 ## 3.2 (5 points)
