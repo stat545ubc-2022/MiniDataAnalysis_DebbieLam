@@ -1,6 +1,0 @@
----
-title: "Mini Data Analysis Milestone 2"
-output: github_document
----
-
-This folder contains the source for Milestone 1
