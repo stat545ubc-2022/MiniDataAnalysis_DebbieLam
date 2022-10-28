@@ -315,7 +315,12 @@ Write your model object from Task 3 to an R binary file (an RDS), and load it ag
 -   The same robustness and reproducibility criteria as in 3.1 apply here.
 
 <!-------------------------- Start your work below ---------------------------->
+```{r}
+saveRDS(vancouver_trees_lm, here::here("output", "vancouver_trees_lm_rds.RDS"))
+dir(here::here("output"))
 
+readRDS(here::here("output", "vancouver_trees_lm_rds.RDS"))
+```
 <!----------------------------------------------------------------------------->
 
 # Tidy Repository
